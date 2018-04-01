@@ -1,8 +1,14 @@
 from sys import *
+import string
 
 tokens = []
 num_stack = []
 symbols = {}
+
+DIGITS = string.digits
+EMPTY_STR = ""
+WHITE_SPACE = " "
+NEW_LINE = "\n"
 
 def open_file(filename):
     data = open(filename, "r").read()
@@ -11,43 +17,43 @@ def open_file(filename):
 
 
 def lex(filecontents):
-    tok = ""
+    tok = EMPTY_STR
     state = 0
     varStarted = 0
-    expr = ""
-    string = ""
-    var = ""
+    expr = EMPTY_STR
+    string = EMPTY_STR
+    var = EMPTY_STR
     isexpr = 0
     filecontents = list(filecontents)
     for char in filecontents:
         tok += char
-        if char == " ":
+        if char == WHITE_SPACE:
             if state == 0:
-                tok = ""
+                tok = EMPTY_STR
             else:
-                tok = " "
-        elif tok == "\n" or tok == "~":
-            if expr != "" and isexpr == 1:
+                tok = WHITE_SPACE
+        elif tok == NEW_LINE or tok == "~":
+            if expr != EMPTY_STR and isexpr == 1:
                 tokens.append("EXPR:" + expr)
-                expr = ""
+                expr = EMPTY_STR
                 isexpr = 0
-            elif expr != "" and isexpr == 0:
+            elif expr != EMPTY_STR and isexpr == 0:
                 tokens.append("NUM:" + expr)
-                expr = ""
-            elif var != "":
+                expr = EMPTY_STR
+            elif var != EMPTY_STR:
                 tokens.append("VAR:" + var)
-                var = ""
+                var = EMPTY_STR
                 varStarted = 0
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "\t":
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "=" and state == 0:
-            if expr != "" and isexpr == 0:
+            if expr != EMPTY_STR and isexpr == 0:
                 tokens.append("NUM:" + expr)
-                expr = ""
-            if var != "":
+                expr = EMPTY_STR
+            if var != EMPTY_STR:
                 tokens.append("VAR:" + var)
-                var = ""
+                var = EMPTY_STR
                 varStarted = 0
             if tokens[-1] == "EQUALS":
                 tokens[-1] = "EQEQ"
@@ -57,14 +63,14 @@ def lex(filecontents):
                 tokens[-1] = "GREATEROREQ"
             else:
                 tokens.append("EQUALS")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "!=" or tok == ">" or tok == "<" and state == 0:
-            if expr != "" and isexpr == 0:
+            if expr != EMPTY_STR and isexpr == 0:
                 tokens.append("NUM:" + expr)
-                expr = ""
-            if var != "":
+                expr = EMPTY_STR
+            if var != EMPTY_STR:
                 tokens.append("VAR:" + var)
-                var = ""
+                var = EMPTY_STR
                 varStarted = 0
             if tok == "!=":
                 tokens.append("NOTEQ")
@@ -72,58 +78,58 @@ def lex(filecontents):
                 tokens.append("LESS")
             elif tok == ">":
                 tokens.append("GREATER")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "$" and state == 0:
             varStarted = 1
             var += tok
-            tok = ""
+            tok = EMPTY_STR
         elif varStarted == 1:
             if tok == "<" or tok == ">":
-                if var != "":
+                if var != EMPTY_STR:
                     tokens.append("VAR:" + var)
-                    var = ""
+                    var = EMPTY_STR
                     varStarted = 0
             var += tok
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "PRINT" or tok == "print":
             tokens.append("PRINT")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "}":
             tokens.append("END")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "IF" or tok == "if":
             tokens.append("IF")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "WHILE" or tok == "while":
             tokens.append("WHILE")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "{":
-            if expr != "" and isexpr == 0:
+            if expr != EMPTY_STR and isexpr == 0:
                 tokens.append("NUM:" + expr)
-                expr = ""
+                expr = EMPTY_STR
             tokens.append("THEN")
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "INPUT" or tok == "input":
             tokens.append("INPUT")
-            tok = ""
-        elif tok == "1" or tok == "2" or tok == "3" or tok == "4" or tok == "5" or tok == "6" or tok == "7" or tok == "8" or tok == "9" or tok == "0":
+            tok = EMPTY_STR
+        elif tok in DIGITS:
             expr += tok
-            tok = ""
+            tok = EMPTY_STR
         elif tok == "+" or tok == "-" or tok == "*" or tok == "/" or tok == "%" or tok == "(" or tok == ")":
             isexpr = 1
             expr += tok
-            tok = ""
-        elif tok == "\"" or tok == " \"":
+            tok = EMPTY_STR
+        elif tok == "\EMPTY_STR or tok == " \EMPTY_STR:
             if state == 1:
-                tokens.append("STRING:" + string + "\"")
-                string = ""
+                tokens.append("STRING:" + string + "\EMPTY_STR)
+                string = EMPTY_STR
                 state = 0
-                tok = ""
+                tok = EMPTY_STR
             elif state == 0:
                 state = 1
         elif state == 1:
             string += tok
-            tok = ""
+            tok = EMPTY_STR
 
 
     #print(tokens)
@@ -137,13 +143,13 @@ def evalExpression(expr):
     
     # Custom Evaluator:
     # i = len(expr) - 1
-    # num = ""
+    # num = EMPTY_STR
     # print(expr)
     # while i >= 0:
     #     if expr[i] == "+" or expr[i] == "-" or expr[i] == "*" or expr[i] == "/" or expr[i] == "%":
     #         num = num[::-1]
     #         num_stack.append(num)
-    #         num = ""
+    #         num = EMPTY_STR
     #         num_stack.append(expr[i])
     #     else:
     #         num += expr[i]
@@ -167,7 +173,7 @@ def getVariableValue(var):
         if symbols[var[4:]][:3] == "NUM":
             return symbols[var[4:]][4:]
         elif symbols[var[4:]][:3] == "STR":
-            if symbols[var[4:]][4] == "\"" and symbols[var[4:]][-1] == "\"":
+            if symbols[var[4:]][4] == "\EMPTY_STR and symbols[var[4:]][-1] == "\EMPTY_STR:
                 return symbols[var[4:]][5:-1]
             else:
                 return symbols[var[4:]][4:]
@@ -177,13 +183,13 @@ def getVariableValue(var):
         exit("Variable " + str(var[4:]) + " not defined")
 
 def doPrint(tok1, tok2):
-    if tok1 + " " + tok2[0:6] == "PRINT STRING":
+    if tok1 + WHITE_SPACE + tok2[0:6] == "PRINT STRING":
         print(tok2[8:-1])
-    elif tok1 + " " + tok2[0:3] == "PRINT NUM":
+    elif tok1 + WHITE_SPACE + tok2[0:3] == "PRINT NUM":
         print(tok2[4:])
-    elif tok1 + " " + tok2[0:4] == "PRINT EXPR":
+    elif tok1 + WHITE_SPACE + tok2[0:4] == "PRINT EXPR":
         print(evalExpression(tok2[5:]))
-    elif tok1 + " " + tok2[0:3] == "PRINT VAR":
+    elif tok1 + WHITE_SPACE + tok2[0:3] == "PRINT VAR":
         print(getVariableValue(tok2))
         # if str(tok2[4:]) in symbols:
         #     if symbols[tok2[4:7]][:3] == "NUM":
@@ -266,7 +272,7 @@ def doEvaluation(var1, operator, var2):
 
 
 def doInput(prompt, var):
-    i = input(prompt + "\n")
+    i = input(prompt + NEW_LINE)
     symbols[var] = "STR:" + i
 
 
@@ -297,20 +303,20 @@ def parse(tokens):
                         #if there is an operator then we need to evaluate the variable 
                         if "+" in tokens[x + 2] or "-" in tokens[x + 2] or "*" in tokens[x + 2] or "/" in tokens[x + 2] or "%" in tokens[x + 2]:
                             tokensToEval = []
-                            tok = ""
+                            tok = EMPTY_STR
                             y = 0
                             isexpr = 0
                             for char in tokens[x + 2]:
                                 if char == "+" or char == "-" or char == "%" or char == "*" or char == "/":
                                     tokensToEval.append(tok)
                                     tokensToEval.append(char)
-                                    tok = ""  
+                                    tok = EMPTY_STR  
                                 else:
                                     tok += char
                                 y += 1
                                 if y == len(tokens[x + 2]):
                                     tokensToEval.append(tok)
-                            expressionToEval = ""
+                            expressionToEval = EMPTY_STR
                             for token in tokensToEval:
                                 if len(token) >= 4 or token[:1] == "$":
                                     if token[:1] == "$":
@@ -364,7 +370,7 @@ def parse(tokens):
 
                     #print(tokensInWhile)
                     while doEvaluation(tokens[x + 1], tokens[x + 2], tokens[x + 3]):
-                        #print("")
+                        #print(EMPTY_STR)
                         parse(tokensInWhile)
                     exit()
                 else:
@@ -382,7 +388,7 @@ def parse(tokens):
 
 
 def run():
-    data = open_file(argv[1])
+    data = open_file('test.lang')
     tokens = lex(data)
     parse(tokens)
 
